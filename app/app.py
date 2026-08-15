@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "AutoScale Hub is running!"
+    return "AutoScale Hub v2 - CI/CD is working!"
 
 @app.route("/health")
 def health():
@@ -13,4 +13,3 @@ def health():
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 
-    
