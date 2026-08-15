@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "AutoScale Hub v2 - CI/CD is working!"
+    return "AutoScale Hub v2 - CI/CD is working !!"
 
 @app.route("/health")
 def health():
