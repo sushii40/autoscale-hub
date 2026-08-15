@@ -19,20 +19,56 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Prepare image name
+      - name: Prepare image information
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           DOCKER_USERNAME=$(echo "$DOCKER_USERNAME" | xargs)
-          echo "IMAGE_NAME=$DOCKER_USERNAME/autoscale-hub:latest" >> "$GITHUB_ENV"
+
+          COMMIT_ID="${GITHUB_SHA::7}"
+
+          IMAGE_NAME="$DOCKER_USERNAME/autoscale-hub"
+          IMAGE_LATEST="$IMAGE_NAME:latest"
+          IMAGE_VERSION="$IMAGE_NAME:$COMMIT_ID"
+
+          echo "IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_ENV"
+          echo "IMAGE_LATEST=$IMAGE_LATEST" >> "$GITHUB_ENV"
+          echo "IMAGE_VERSION=$IMAGE_VERSION" >> "$GITHUB_ENV"
+          echo "COMMIT_ID=$COMMIT_ID" >> "$GITHUB_ENV"
+
+          echo "======================================"
+          echo "Deployment Information"
+          echo "Developer: $GITHUB_ACTOR"
+          echo "Commit ID: $COMMIT_ID"
+          echo "Commit Message: $GITHUB_EVENT_HEAD_COMMIT_MESSAGE"
+          echo "======================================"
 
       - name: Build Docker image
         run: |
-          echo "Building $IMAGE_NAME"
-          docker build -t "$IMAGE_NAME" .
+          echo "Building Docker image..."
+          echo "Latest tag: $IMAGE_LATEST"
+          echo "Version tag: $IMAGE_VERSION"
+
+          docker build \
+            -t "$IMAGE_LATEST" \
+            -t "$IMAGE_VERSION" \
+            .
 
       - name: Push Docker image
         run: |
-          docker push "$IMAGE_NAME"
+          echo "Pushing latest image..."
+          docker push "$IMAGE_LATEST"
 
-          
+          echo "Pushing versioned image..."
+          docker push "$IMAGE_VERSION"
+
+      - name: Deployment summary
+        run: |
+          echo "======================================"
+          echo "AutoScale Hub Deployment"
+          echo "======================================"
+          echo "Developer: $GITHUB_ACTOR"
+          echo "Commit: $COMMIT_ID"
+          echo "Docker Image: $IMAGE_VERSION"
+          echo "Status: Build and Push Successful"
+          echo "======================================"
