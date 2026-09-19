@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscale-hub-app
+  labels:
+    app: autoscale-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoscale-hub
+  template:
+    metadata:
+      labels:
+        app: autoscale-hub
+    spec:
+      containers:
+      - name: web-app
+        # REPLACE 'YOUR_DOCKERHUB_USERNAME' with the Docker Hub username configured in GitHub Secrets (e.g., sushii40/autoscale-hub:latest)
+        image: YOUR_DOCKERHUB_USERNAME/autoscale-hub:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "500m"
+            memory: "128Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
