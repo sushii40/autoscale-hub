@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autoscale-developer
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: autoscale-developer-role
+  namespace: default
+rules:
+  # Read-only access to view deployments, pods, and services
+  - apiGroups: ["", "apps"]
+    resources: ["pods", "pods/log", "deployments", "services"]
+    verbs: ["get", "list", "watch"]
+  # Permission to restart or scale deployment
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale"]
+    verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: autoscale-developer-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: autoscale-developer
+    namespace: default
+roleRef:
+  kind: Role
+  name: autoscale-developer-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# Admin role for deployment automation / CI/CD
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autoscale-deployer
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: autoscale-deployer-role
+  namespace: default
+rules:
+  - apiGroups: ["", "apps", "autoscaling"]
+    resources: ["pods", "deployments", "services", "horizontalpodautoscalers", "secrets"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: autoscale-deployer-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: autoscale-deployer
+    namespace: default
+roleRef:
+  kind: Role
+  name: autoscale-deployer-role
+  apiGroup: rbac.authorization.k8s.io

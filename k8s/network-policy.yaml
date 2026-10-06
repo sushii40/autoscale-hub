@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: autoscale-hub-firewall
+  namespace: default
+  labels:
+    app: autoscale-hub
+spec:
+  podSelector:
+    matchLabels:
+      app: autoscale-hub
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow incoming traffic only on container port 5000 (from Load Balancer / internal callers)
+    - ports:
+        - protocol: TCP
+          port: 5000
+  egress:
+    # Allow outbound DNS resolution
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow outbound HTTP/HTTPS for external metrics/APIs
+    - ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
