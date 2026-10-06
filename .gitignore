@@ -4,3 +4,12 @@ __pycache__/
 venv/
 .venv/
 .vscode/
+
+# macOS
+.DS_Store
+
+# Prometheus generated data
+data/
+
+# SQLite database
+monitoring/*.db
