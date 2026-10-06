@@ -32,7 +32,6 @@ def home():
 def health():
     return "Healthy"
 
-
 @app.route("/update-metrics")
 def update_metrics():
     import psutil
